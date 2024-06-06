@@ -15,17 +15,21 @@ import ubinascii
 
 WIFI_MAC = ubinascii.hexlify(machine.unique_id()).upper()
 # Set  the Gateway ID to be the first 3 bytes of MAC address + 'FFFE' + last 3 bytes of MAC address
-GATEWAY_ID = WIFI_MAC[:6] + "FFFF" + WIFI_MAC[6:12]
+GATEWAY_ID = WIFI_MAC[:6] + "FAFF" + WIFI_MAC[6:12]
 print("GATEWAY_EUI", GATEWAY_ID)
-SERVER =  'eu1.cloud.thethings.network'
+SERVER = 'eu1.cloud.thethings.network'
 PORT = 1700
 
 NTP = "pool.ntp.org"
 NTP_PERIOD_S = 3600
 
-WIFI_SSID = 'Pixel_K'
-WIFI_PASS = "kristi13"
+WIFI_SSID = 'POCO'
+WIFI_PASS = "milastina"
 
+
+#API for the app of triangulation. It will send a POST request to the following url which
+#will save the sent packet into DB
+APP_API = 'http://178.62.210.227/api/save-packet'
 
 # for EU868
 #LORA_FREQUENCY = 868500000

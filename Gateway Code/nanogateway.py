@@ -9,7 +9,7 @@
 #
 
 """ LoPy LoRaWAN Nano Gateway. Can be used for both EU868 and US915. """
-
+import urequest
 import errno
 import machine
 import ubinascii
@@ -18,6 +18,7 @@ import uos
 import usocket
 import utime
 import _thread
+import ustruct
 from micropython import const
 from network import LoRa
 from network import WLAN
@@ -91,7 +92,7 @@ class NanoGateway:
     connecting to the Internet.
     """
 
-    def __init__(self, id, frequency, datarate, ssid, password, server, port, ntp_server='pool.ntp.org', ntp_period=3600):
+    def __init__(self, id, frequency, datarate, ssid, password, server, port, app_api, ntp_server='pool.ntp.org', ntp_period=3600):
         self.id = id
         self.server = server
         self.port = port
@@ -104,6 +105,7 @@ class NanoGateway:
 
         self.ntp_server = ntp_server
         self.ntp_period = ntp_period
+        self.app_api = app_api
 
         self.server_ip = None
 
@@ -136,7 +138,7 @@ class NanoGateway:
         """
 
         self._log('Starting LoRaWAN nano gateway with id: {}', self.id)
-
+        self._log('APP API --- {}', self.app_api)
         # setup WiFi as a station and connect
         self.wlan = WLAN(mode=WLAN.STA)
         self._connect_to_wifi()
@@ -218,7 +220,8 @@ class NanoGateway:
         self.wlan.connect(self.ssid, auth=(None, self.password))
         while not self.wlan.isconnected():
             utime.sleep_ms(50)
-    
+        self._log('WiFi connected to: {}', self.ssid)
+
     def _dr_to_sf(self, dr):
         sf = dr[2:4]
         if sf[1] not in '0123456789':
@@ -233,7 +236,6 @@ class NanoGateway:
             return LoRa.BW_250KHZ
         else:
             return LoRa.BW_500KHZ
-
 
     def _sf_bw_to_dr(self, sf, bw):
         dr = 'SF' + str(sf)
@@ -255,10 +257,13 @@ class NanoGateway:
             self.rxok += 1
             rx_data = self.lora_sock.recv(256)
             stats = lora.stats()
-            packet = self._make_node_packet(rx_data, self.rtc.now(), stats.rx_timestamp, stats.sfrx, self.bw, stats.rssi, stats.snr)
+            packet = self._make_node_packet(rx_data, self.rtc.now(), stats.rx_timestamp, stats.sfrx, self.bw, stats.rssi, 333)
             packet = self.frequency_rounding_fix(packet, self.frequency)
             self._push_data(packet)
             self._log('Received packet: {}', packet)
+            self._log('--APP request--')
+            urequest.urlopen(self.app_api, data=packet, method='POST')
+
             self.rxfw += 1
         if events & LoRa.TX_PACKET_EVENT:
             self.txnb += 1
@@ -289,7 +294,6 @@ class NanoGateway:
         if divider > 0:
             frequency = frequency / (10 ** divider)
         return frequency
-    
 
     def frequency_rounding_fix(self, packet, frequency):
         freq = str(frequency)[0:3] + '.' + str(frequency)[3]
@@ -330,7 +334,6 @@ class NanoGateway:
                 self.sock.sendto(packet, self.server_ip)
             except Exception as ex:
                 self._log('Failed to push uplink packet to server: {}', ex)
-
 
     def _pull_data(self):
         token = uos.urandom(2)
@@ -376,7 +379,6 @@ class NanoGateway:
             datarate,
             data
         )
-
 
     def _send_down_link_class_c(self, data, datarate, frequency):
         self.lora.init(

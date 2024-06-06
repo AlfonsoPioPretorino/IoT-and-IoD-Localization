@@ -22,8 +22,9 @@ if __name__ == '__main__':
         password=config.WIFI_PASS,
         server=config.SERVER,
         port=config.PORT,
+        app_api = config.APP_API,
         ntp_server=config.NTP,
-        ntp_period=config.NTP_PERIOD_S
+        ntp_period=config.NTP_PERIOD_S,
         )
 
     nanogw.start()
