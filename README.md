@@ -2,7 +2,7 @@
 Hello, we are Alfonso, Fernando, Giuseppe and Ardit, students attending Master Degree in Computer Science - Security Engeneering at University of Bari. This system was developed for the exam of IoT Security.<br>
 
 <p float="center">
-    <img src="readme/g_logo.png" alt="alt text" width="200" center/>
+    <img src="IoD-App/readme/g_logo.png" alt="alt text" width="200" center/>
 </p>
 
 ### How does it work?
@@ -19,7 +19,7 @@ The data will be sent by a node collocated on a drone. The position of the drone
 Each time a packet is recived by the gateway, it will do a POST request to our webapp, which will do the appropriate tasks in order to show the data on the session page.
 
 This process is shown by the following figure
-![alt text](readme/System%20Architecture.svg?raw=true)
+![alt text](IoD-App/readme/System%20Architecture.svg?raw=true)
 ___
 # How to run the system
 Note that the .env file containing all the credentials was send to our supervisor. Ask him to get the copy that was used for this project. (or you can make a copy of the example and configure it by your own)
